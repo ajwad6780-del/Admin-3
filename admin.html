@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - أونلاين</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="./admin.css">
+</head>
+<body class="theme-1 selection:bg-[var(--main)] selection:text-black">
+
+    <div id="loadingOverlay" class="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center">
+        <div class="w-12 h-12 border-4 border-[var(--main)] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <div class="text-gray-400 font-bold">جاري الاتصال بقاعدة البيانات...</div>
+    </div>
+
+    <div id="adminPanel" class="min-h-screen pb-20 hidden animate__animated animate__fadeIn">
+        <header class="bg-[#111] border-b border-white/5 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+            <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-[var(--main)] flex items-center justify-center text-black font-black text-lg">Q</div>
+                    <h2 class="text-xl font-bold">لوحة التحكم (Online)</h2>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="window.open('index.html', '_blank')" class="bg-white/5 hover:bg-white/10 px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                        <i class="fas fa-eye"></i> معاينة المينيو
+                    </button>
+                    <button id="saveBtn" onclick="window.saveToCloud()" class="bg-[var(--main)] text-black px-6 py-2.5 rounded-xl text-sm font-black hover:brightness-110 transition shadow-lg shadow-[var(--main)]/20 flex items-center gap-2">
+                        <i class="fas fa-cloud-upload-alt"></i> حفظ التغييرات
+                    </button>
+                </div>
+            </div>
+            <div class="max-w-6xl mx-auto px-4 mt-2 overflow-x-auto flex gap-6 text-sm no-scrollbar">
+                <button onclick="switchTab('settings')" class="tab-btn active py-3 whitespace-nowrap"><i class="fas fa-cog me-2"></i>الإعدادات</button>
+                <button onclick="switchTab('interface')" class="tab-btn py-3 whitespace-nowrap"><i class="fas fa-store me-2"></i>المظهر</button>
+                <button onclick="switchTab('cats')" class="tab-btn py-3 whitespace-nowrap"><i class="fas fa-utensils me-2"></i>القائمة</button>
+                <button onclick="switchTab('stock')" class="tab-btn py-3 whitespace-nowrap text-red-400 font-bold"><i class="fas fa-boxes me-2"></i>إدارة المخزون</button>
+                <button onclick="switchTab('social')" class="tab-btn py-3 whitespace-nowrap"><i class="fas fa-share-alt me-2"></i>التواصل</button>
+                <button onclick="switchTab('themes')" class="tab-btn py-3 whitespace-nowrap"><i class="fas fa-palette me-2"></i>الثيمات</button>
+            </div>
+        </header>
+
+        <div class="max-w-5xl mx-auto p-4 md:p-8 space-y-8">
+            
+            <div id="tab-settings" class="tab-content animate__animated animate__fadeIn">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-[#111] p-6 rounded-2xl border border-white/5 shadow-xl">
+                        <h3 class="text-lg font-bold mb-4 text-[var(--main)]">البيانات الأساسية</h3>
+                        <div class="space-y-4">
+                            <div><label class="text-xs text-gray-400 mb-1 block">اسم المطعم</label><input id="set_name" class="input-box"></div>
+                            <div><label class="text-xs text-gray-400 mb-1 block">وصف مختصر</label><input id="set_desc" class="input-box"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-xs text-gray-400 mb-1 block">رقم الواتساب</label><input id="set_wa" class="input-box" type="number"></div>
+                                <div><label class="text-xs text-gray-400 mb-1 block font-bold text-[var(--main)]">سعر التوصيل</label><input id="set_delivery_fee" class="input-box border-[var(--main)]/30" type="number"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-[#111] p-6 rounded-2xl border border-white/5 shadow-xl">
+                        <h3 class="text-lg font-bold mb-4 text-[var(--main)]">الأمان</h3>
+                        <div class="space-y-4"><div><label class="text-xs text-gray-400 mb-1 block">كلمة مرور الإدارة</label><input id="set_pass" class="input-box"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-interface" class="tab-content hidden animate__animated animate__fadeIn">
+                <div class="grid gap-8">
+                    <div class="bg-[#111] p-6 rounded-3xl border border-white/5 shadow-2xl">
+                        <h3 class="text-xl font-black mb-6 flex items-center gap-2 text-white"><span class="w-8 h-8 rounded-lg bg-[var(--main)] text-black flex items-center justify-center text-sm"><i class="fas fa-power-off"></i></span> حالة المطعم</h3>
+                        <input type="hidden" id="set_status">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div onclick="selectStatus('auto')" id="status-card-auto" class="status-card p-5 rounded-2xl text-center flex flex-col items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-xl"><i class="fas fa-clock"></i></div>
+                                <div><div class="font-bold text-lg">تلقائي</div><div class="text-xs text-gray-400 mt-1">حسب الجدول</div></div>
+                            </div>
+                            <div onclick="selectStatus('open')" id="status-card-open" class="status-card p-5 rounded-2xl text-center flex flex-col items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center text-xl"><i class="fas fa-door-open"></i></div>
+                                <div><div class="font-bold text-lg">مفتوح دائماً</div><div class="text-xs text-gray-400 mt-1">تجاهل الجدول</div></div>
+                            </div>
+                            <div onclick="selectStatus('closed')" id="status-card-closed" class="status-card p-5 rounded-2xl text-center flex flex-col items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center text-xl"><i class="fas fa-door-closed"></i></div>
+                                <div><div class="font-bold text-lg">مغلق مؤقتاً</div><div class="text-xs text-gray-400 mt-1">للطوارئ</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="scheduleContainer" class="hidden bg-[#111] p-6 rounded-3xl border border-white/5 shadow-2xl animate__animated animate__fadeInDown">
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-white/5 pb-4">
+                            <h3 class="text-xl font-black flex items-center gap-2"><span class="text-[var(--main)]"><i class="far fa-calendar-alt"></i></span> ساعات العمل</h3>
+                            <button onclick="copyFirstDayToAll()" class="text-xs bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg transition flex items-center gap-2 border border-white/10"><i class="fas fa-copy"></i> نسخ توقيت السبت للجميع</button>
+                        </div>
+                        <div id="weeklySchedule" class="space-y-2"></div>
+                    </div>
+
+                    <div class="bg-[#111] p-6 rounded-3xl border border-white/5 shadow-2xl">
+                        <h3 class="text-xl font-black mb-6 flex items-center gap-2"><span class="text-[var(--main)]"><i class="fas fa-image"></i></span> الهوية البصرية</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                <label class="text-xs font-bold text-gray-400 mb-2 block">رابط الشعار</label>
+                                <div class="flex gap-3 items-center"><img id="preview_logo" src="" class="w-14 h-14 rounded-xl object-cover bg-black border border-white/10"><input id="set_logo" oninput="document.getElementById('preview_logo').src=this.value" class="input-box"></div>
+                            </div>
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                <label class="text-xs font-bold text-gray-400 mb-2 block">رابط الغلاف</label>
+                                <div class="flex gap-3 items-center"><img id="preview_cover" src="" class="w-24 h-14 rounded-xl object-cover bg-black border border-white/10"><input id="set_cover" oninput="document.getElementById('preview_cover').src=this.value" class="input-box"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#111] p-6 rounded-3xl border border-white/5">
+                        <h3 class="text-lg font-bold mb-4 text-[var(--main)]"><i class="fas fa-bullhorn me-2"></i>نظام الإعلانات</h3>
+                        <div class="bg-white/5 p-4 rounded-xl mb-6">
+                            <label class="text-sm font-bold mb-2 block">الشريط الإخباري</label>
+                            <div class="flex gap-2 mb-2">
+                                <input id="set_ad_text" placeholder="النص..." class="input-box">
+                                <select id="set_ad_mode" class="input-box w-32 bg-[#222]">
+                                    <option value="scroll">متحرك</option>
+                                    <option value="static">ثابت</option>
+                                    <option value="none">إخفاء</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="text-sm font-bold">صور السلايدر (البانرات)</label>
+                                <button onclick="addAdImageInput()" class="text-xs bg-[var(--main)] text-black px-3 py-1 rounded font-bold">+ إضافة صورة</button>
+                            </div>
+                            <div id="adImagesContainer" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-cats" class="tab-content hidden animate__animated animate__fadeIn">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">قائمة الطعام</h3>
+                    <div class="flex gap-2">
+                        <button onclick="addCat()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-bold">+ صنف جديد</button>
+                        <button onclick="openItemEditor()" class="bg-[var(--main)] text-black px-4 py-2 rounded-lg text-sm font-bold shadow-lg shadow-[var(--main)]/20">+ أكلة جديدة</button>
+                    </div>
+                </div>
+                
+                <div class="menu-search-container animate__animated animate__fadeIn">
+                    <input type="text" id="menuSearchInput" onkeyup="renderCategories()" placeholder="ابحث عن طبق، مكونات، أو سعر..." class="menu-search-box">
+                    <i class="fas fa-search search-icon-float"></i>
+                </div>
+
+                <div id="adminCatList" class="space-y-4"></div>
+            </div>
+
+            <div id="tab-stock" class="tab-content hidden animate__animated animate__fadeIn">
+                <div class="bg-[#111] p-6 rounded-3xl border border-white/5 shadow-2xl mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div><h3 class="text-2xl font-black text-[var(--main)] mb-1"><i class="fas fa-boxes me-2"></i> إدارة المخزون</h3><p class="text-gray-400 text-sm">تحكم في توفر الأطباق بضغطة زر</p></div>
+                        <div class="bg-red-500/10 border border-red-500/20 px-6 py-3 rounded-2xl flex flex-col items-center min-w-[120px]"><span class="text-3xl font-black text-red-500" id="stat_sold_count">0</span><span class="text-[10px] text-gray-400 font-bold tracking-wide">أطباق موقوفة</span></div>
+                    </div>
+                    <div class="mt-6 relative"><i class="fas fa-search absolute right-4 top-4 text-gray-500"></i><input type="text" id="stockSearch" oninput="renderStockItems(this.value)" placeholder="ابحث عن اسم الطبق..." class="input-box bg-[#0a0a0a] border-none pr-12 h-14 text-lg rounded-2xl focus:ring-2 ring-[var(--main)]/50 transition"></div>
+                </div>
+                <div id="stockList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <div id="tab-social" class="tab-content hidden animate__animated animate__fadeIn">
+                <div class="bg-[#111] p-6 rounded-2xl border border-white/5 space-y-4">
+                    <h3 class="text-lg font-bold text-[var(--main)]">روابط التواصل</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="flex items-center gap-3"><i class="fab fa-facebook text-blue-500 w-6 text-center"></i><input id="set_fb" class="input-box"></div>
+                        <div class="flex items-center gap-3"><i class="fab fa-instagram text-pink-500 w-6 text-center"></i><input id="set_ig" class="input-box"></div>
+                        <div class="flex items-center gap-3"><i class="fab fa-tiktok text-white w-6 text-center"></i><input id="set_tk" class="input-box"></div>
+                        <div class="flex items-center gap-3"><i class="fas fa-map-marker-alt text-red-500 w-6 text-center"></i><input id="set_map" class="input-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-themes" class="tab-content hidden animate__animated animate__fadeIn">
+                <div id="themesContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stockModal" class="fixed inset-0 z-[300] bg-black/90 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-[#151515] w-full max-w-md rounded-[32px] p-6 border border-white/10 shadow-2xl animate__animated animate__zoomIn">
+            <div class="text-center mb-6"><h3 class="text-xl font-black mb-1" id="modalItemName">اسم الطبق</h3><p class="text-gray-500 text-xs">حدد حالة التوفر لهذا الطبق</p></div>
+            <input type="hidden" id="stock_item_id"><input type="hidden" id="selected_mode" value="available">
+            <div class="space-y-2">
+                <div onclick="selectStockOption('available')" id="opt-available" class="option-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center"><i class="fas fa-check"></i></div><span class="font-bold">متاح (متوفر)</span></div><div class="option-radio"></div></div>
+                <div onclick="selectStockOption('auto')" id="opt-auto" class="option-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-yellow-500/10 text-yellow-500 flex items-center justify-center"><i class="fas fa-moon"></i></div><div><div class="font-bold">تلقائي (يعود غداً)</div><div class="text-[10px] text-gray-500">يعود متاحاً الساعة 6:00 ص</div></div></div><div class="option-radio"></div></div>
+                <div onclick="selectStockOption('timed')" id="opt-timed" class="option-card flex-col !items-stretch gap-4"><div class="flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center"><i class="fas fa-stopwatch"></i></div><span class="font-bold">تحديد وقت للعودة</span></div><div class="option-radio"></div></div><div id="timeInputs" class="hidden border-t border-white/5 pt-4 mt-2 animate__animated animate__fadeIn"><label class="text-xs text-gray-400 mb-2 block">يعود متاحاً بعد:</label><div class="flex gap-2"><input type="number" id="time_duration" class="input-box text-center font-bold text-lg" value="1" min="1"><div class="flex bg-[#0a0a0a] rounded-xl p-1 border border-white/5"><button onclick="setTimeUnit('hours')" id="btn-hours" class="time-btn active px-4 py-2 rounded-lg text-xs font-bold">ساعات</button><button onclick="setTimeUnit('days')" id="btn-days" class="time-btn px-4 py-2 rounded-lg text-xs font-bold">أيام</button></div></div></div></div>
+                <div onclick="selectStockOption('manual')" id="opt-manual" class="option-card"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center"><i class="fas fa-ban"></i></div><span class="font-bold">يدوي (إيقاف دائم)</span></div><div class="option-radio"></div></div>
+            </div>
+            <div class="flex gap-3 mt-8"><button onclick="saveStockSettings()" class="flex-[2] bg-[var(--main)] text-black py-4 rounded-xl font-black hover:brightness-110 transition">حفظ الحالة</button><button onclick="document.getElementById('stockModal').classList.add('hidden')" class="flex-1 bg-white/5 py-4 rounded-xl font-bold hover:bg-white/10 transition">إلغاء</button></div>
+        </div>
+    </div>
+
+    <div id="itemModal" class="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 animate__animated animate__fadeIn">
+        <div class="bg-[#151515] w-full max-w-4xl h-auto max-h-[90vh] rounded-[32px] p-6 md:p-8 border border-white/10 shadow-2xl overflow-y-auto">
+            <div class="pro-modal-grid">
+                <div class="space-y-5">
+                    <div class="flex justify-between items-center mb-2"><h3 class="text-2xl font-black text-[var(--main)] flex items-center gap-2"><i class="fas fa-edit"></i> تعديل بيانات الطبق</h3></div>
+                    <input type="hidden" id="edit_id">
+                    <div class="grid grid-cols-2 gap-4 modal-input-group"><div><label>اسم الطبق</label><input id="edit_name" oninput="updatePreview()" class="input-box" placeholder="مثلاً: برجر لحم"></div><div><label>التصنيف</label><select id="edit_cat" class="input-box text-sm"></select></div></div>
+                    <div class="grid grid-cols-3 gap-4 modal-input-group"><div class="col-span-2"><label>السعر الحالي</label><input id="edit_price" oninput="updatePreview()" type="number" class="input-box font-bold text-[var(--main)]"></div><div><label>السعر القديم (للخصم)</label><input id="edit_old" type="number" class="input-box text-gray-500"></div></div>
+                    <div class="modal-input-group"><label>رابط الصورة</label><input id="edit_img" oninput="updatePreview()" class="input-box text-xs font-mono text-blue-400" placeholder="https://..."></div>
+                    <div class="modal-input-group"><label>وصف الطبق (المكونات)</label><textarea id="edit_desc" oninput="updatePreview()" class="input-box h-24 resize-none leading-relaxed" placeholder="اكتب وصفاً شهياً للطبق..."></textarea></div>
+                </div>
+                <div class="hidden md:block pt-8">
+                    <div class="text-center mb-4"><span class="bg-white/10 text-white px-3 py-1 rounded-full text-[10px] font-bold"><i class="fas fa-eye me-1"></i> معاينة حية (Live Preview)</span></div>
+                    <div class="live-preview-card animate__animated animate__pulse">
+                        <img id="prev_img" src="https://placehold.co/400x300/1a1a1a/333?text=Preview" class="live-preview-img">
+                        <div class="live-preview-body"><div class="flex justify-between items-start mb-2"><h3 id="prev_name" class="preview-title">اسم الطبق</h3><span id="prev_price" class="preview-price">0 د.ع</span></div><p id="prev_desc" class="preview-desc">الوصف سيظهر هنا بشكل مباشر أثناء الكتابة...</p><div class="flex gap-2 mt-4 opacity-50"><div class="h-2 bg-gray-700 rounded w-1/4"></div><div class="h-2 bg-gray-700 rounded w-1/4"></div></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-4 mt-8 pt-6 border-t border-white/5"><button onclick="saveItem()" class="flex-[2] bg-[var(--main)] text-black py-4 rounded-xl font-black text-lg hover:brightness-110 shadow-lg shadow-[var(--main)]/20 transition"><i class="fas fa-save me-2"></i> حفظ التعديلات</button><button onclick="document.getElementById('itemModal').classList.add('hidden')" class="flex-1 bg-white/5 py-4 rounded-xl font-bold hover:bg-white/10 transition text-white">إلغاء</button></div>
+        </div>
+    </div>
+    
+    <div id="loginModal" class="fixed inset-0 z-[100] bg-black flex items-center justify-center p-4">
+        <div class="bg-[#111] w-full max-w-sm p-8 rounded-3xl border border-white/10 text-center shadow-2xl animate__animated animate__zoomIn">
+            <div class="w-16 h-16 bg-[var(--main)] rounded-full mx-auto mb-6 flex items-center justify-center text-2xl font-black text-black"><i class="fas fa-lock"></i></div>
+            <h2 class="font-bold mb-2 text-2xl">دخول الإدارة</h2>
+            <input id="loginPass" type="password" class="input-box mb-4 text-center text-lg tracking-widest" placeholder="••••">
+            <button onclick="doLogin()" class="w-full bg-[var(--main)] text-black py-3.5 rounded-xl font-bold hover:brightness-110 transition">دخول</button>
+        </div>
+    </div>
+
+    <script type="module" src="./admin.js"></script>
+</body>
+</html>
